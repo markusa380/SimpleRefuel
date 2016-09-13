@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleRefuel
@@ -12,16 +13,22 @@ namespace SimpleRefuel
         Rect WindowRect;
         bool visible = true;
         GUIStyle style = GUIStyle.none;
+        GUIStyle style2 = new GUIStyle(Instantiate(HighLogic.Skin).button);
         bool refuelling = false;
         Vessel vessel;
         int i;
         int o;
+        bool select_fuel = false;
+
+        List<string> resources = new List<string>();
+        int current_resource = 0;
 
         void Reset()
         {
             refuelling = false;
             i = 0;
             o = 0;
+            select_fuel = false;
         }
 
         void Awake()
@@ -31,7 +38,7 @@ namespace SimpleRefuel
 
             guid = Guid.NewGuid().GetHashCode();
 
-            WindowRect = new Rect(Screen.width / 2f - 40f, Screen.height * 0.6f, 80f, 10f);
+            WindowRect = new Rect(Screen.width / 2f - 100f, Screen.height * 0.6f, 200f, 10f);
         }
 
         void Update()
@@ -42,10 +49,9 @@ namespace SimpleRefuel
                 vessel = FlightGlobals.ActiveVessel;
             }
 
-            if( Math.Round(vessel.srf_velocity.magnitude) == 0f && (vessel.situation == Vessel.Situations.LANDED || vessel.situation == Vessel.Situations.PRELAUNCH) && (vessel.transform.position - SpaceCenter.Instance.transform.position).magnitude <= SpaceCenter.Instance.AreaRadius  )
+            if( (int)vessel.srfSpeed == 0 && (vessel.situation == Vessel.Situations.LANDED || vessel.situation == Vessel.Situations.PRELAUNCH) && (vessel.transform.position - SpaceCenter.Instance.transform.position).sqrMagnitude <= SpaceCenter.Instance.AreaRadius * SpaceCenter.Instance.AreaRadius  )
             {
                 canRefuel = true;
-                
             }
             else
             {
@@ -63,7 +69,7 @@ namespace SimpleRefuel
                 {
                     PartResource r = part.Resources.list[o];
 
-                    if ((r.resourceName == "LiquidFuel" || r.resourceName == "Oxidizer" || r.resourceName == "ElectricCharge" || r.resourceName == "MonoPropellant") && r.amount < r.maxAmount)
+                    if (r.resourceName == resources[current_resource] && r.amount < r.maxAmount)
                     {
                         r.amount += 10f * TimeWarp.deltaTime; // Charge 10 units per second
                         still_refuelling = true;
@@ -89,8 +95,7 @@ namespace SimpleRefuel
 
                     if (i >= vessel.parts.Count - 1)
                     {
-                        refuelling = false;
-                        i = 0;
+                        Reset();                        
                     }
                 }
             }
@@ -107,9 +112,49 @@ namespace SimpleRefuel
         void GUI(int id)
         {
             GUILayout.BeginVertical();
-            if (GUILayout.Button("Refuel", new GUIStyle(Instantiate(HighLogic.Skin).button ), GUILayout.ExpandWidth(true)))
+            if (!select_fuel)
             {
-                refuelling = true;
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(60);
+                if (GUILayout.Button("Refuel", style2, GUILayout.ExpandWidth(true)))
+                {
+                    select_fuel = true;
+                    resources.Clear();
+                    foreach(Part p in FlightGlobals.ActiveVessel.Parts)
+                    {
+                        foreach(PartResource r in p.Resources)
+                        {
+                            if(!resources.Contains(r.resourceName))
+                            {
+                                resources.Add(r.resourceName);
+                            }
+                        }
+                    }
+                }
+                GUILayout.Space(60);
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                GUILayout.BeginHorizontal();
+                if(GUILayout.Button("<", style2, GUILayout.Width(20)))
+                {
+                    current_resource--;
+                    if (current_resource < 0)
+                        current_resource = resources.Count - 1;
+                }
+                if (GUILayout.Button(resources[current_resource], style2, GUILayout.Width(160)))
+                {
+                    refuelling = true;
+                }
+                if (GUILayout.Button(">", style2, GUILayout.Width(20)))
+                {
+                    current_resource++;
+                    if (current_resource > resources.Count - 1)
+                        current_resource = 0;
+                }
+                GUILayout.EndHorizontal();
+
             }
             GUILayout.EndVertical();
         }
