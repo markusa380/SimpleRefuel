@@ -65,20 +65,23 @@ namespace SimpleRefuel
 
                 bool still_refuelling = false;
 
-                if (part.Resources.list.Count > 0)
+                if (part.Resources.dict.Count > 0)
                 {
-                    PartResource r = part.Resources.list[o];
+                    PartResource r = part.Resources.dict.At(o);
 
                     if (r.resourceName == resources[current_resource] && r.amount < r.maxAmount)
                     {
-                        r.amount += 10f * TimeWarp.deltaTime; // Charge 10 units per second
+                        if (r.maxAmount - r.amount > 10f * TimeWarp.deltaTime)
+                            r.amount += 10f * TimeWarp.deltaTime; // Charge 10 units per second
+                        else
+                            r.amount = r.maxAmount;
+                        
                         still_refuelling = true;
                     }
-
                     if (r.amount >= r.maxAmount)
                     {
                         o++;
-                        if (o >= part.Resources.list.Count)
+                        if (o >= part.Resources.dict.Count)
                         {
                             still_refuelling = false;
                             o = 0;
@@ -92,8 +95,9 @@ namespace SimpleRefuel
                 if (!still_refuelling)
                 {
                     i++;
+                    o = 0;
 
-                    if (i >= vessel.parts.Count - 1)
+                    if (i >= vessel.parts.Count)
                     {
                         Reset();                        
                     }
