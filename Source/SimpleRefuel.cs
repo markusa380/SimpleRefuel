@@ -107,7 +107,7 @@ namespace SimpleRefuel
                 }
             }
         }
-        void Destroy()
+        void OnDestroy()
         {
             DeleteStockToolbar();
         }
@@ -220,8 +220,7 @@ namespace SimpleRefuel
             }
             else
             {
-                select_fuel = false;
-                refuelling = false;
+                Reset();
             }
         }
     }
