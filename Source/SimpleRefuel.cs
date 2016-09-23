@@ -163,6 +163,30 @@ namespace SimpleRefuel
             select_fuel = false;
             resources.Clear();
         }
+        private void Open()
+        {
+            resources.Clear();
+            foreach (Part p in vessel.Parts)
+            {
+                foreach (PartResource r in p.Resources)
+                {
+                    if (!resources.Contains(r.resourceName))
+                    {
+                        resources.Add(r.resourceName);
+                    }
+                }
+            }
+
+            if (canRefuel && !select_fuel)
+            {
+                if (resources.Count > 0)
+                    select_fuel = true;
+            }
+            else
+            {
+                Reset();
+            }
+        }
 
         /* TOOLBAR METHODS */
         private void CreateStockToolbar()
@@ -198,30 +222,6 @@ namespace SimpleRefuel
         private void ChangeButtonTexture(string path)
         {
             button.SetTexture(GameDatabase.Instance.GetTexture(path, false));
-        }
-        private void Open()
-        {
-            resources.Clear();
-            foreach(Part p in vessel.Parts)
-            {
-                foreach(PartResource r in p.Resources)
-                {
-                    if(!resources.Contains(r.resourceName))
-                    {
-                        resources.Add(r.resourceName);
-                    }
-                }
-            }
-
-            if (canRefuel && !select_fuel)
-            {
-                if (resources.Count > 0)
-                    select_fuel = true;
-            }
-            else
-            {
-                Reset();
-            }
         }
     }
 }
