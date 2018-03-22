@@ -30,8 +30,9 @@ namespace SimpleRefuel
         private readonly string icon_green = "SimpleRefuel/Textures/icon_green";
         private readonly string icon_red = "SimpleRefuel/Textures/icon_red";
 
-        /* MONOBEHAVIOUR METHODS */
-        void Awake()
+
+		/* MONOBEHAVIOUR METHODS */
+		void Awake()
         {
             GameEvents.onShowUI.Add(OnShowUI);
             GameEvents.onHideUI.Add(OnHideUI);
@@ -74,8 +75,8 @@ namespace SimpleRefuel
 
                     if (r.resourceName == resources[current_resource] && r.amount < r.maxAmount)
                     {
-                        if (r.maxAmount - r.amount > 10f * TimeWarp.deltaTime)
-                            r.amount += 10f * TimeWarp.deltaTime; // Charge 10 units per second
+                        if (r.maxAmount - r.amount > Config.Instance.RefuelSpeed * TimeWarp.deltaTime)
+                            r.amount += Config.Instance.RefuelSpeed * TimeWarp.deltaTime; // Charge 10 units per second
                         else
                             r.amount = r.maxAmount;
                         
@@ -222,6 +223,6 @@ namespace SimpleRefuel
         private void ChangeButtonTexture(string path)
         {
             button.SetTexture(GameDatabase.Instance.GetTexture(path, false));
-        }
-    }
+		}
+	}
 }
