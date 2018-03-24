@@ -5,27 +5,26 @@ using System.Text;
 
 namespace SimpleRefuel {
 	public class Config {
-		private const string _configFilePath = "GameData/SimpleRefuel/SimpleRefuel.cfg";
-		private const string SettingsNodeName = "SimpleRefuel_Settings";
-		private static Config _instance;
+		private const string settingsNodeName = "SimpleRefuel_Settings";
+		private static Config instance;
 
 		private static string ConfigFilePath {
-			get { return KSPUtil.ApplicationRootPath + _configFilePath; }
+			get { return KSPUtil.ApplicationRootPath + "GameData/SimpleRefuel/SimpleRefuel.cfg"; }
 		}
 
 		internal static Config Instance {
-			get { return _instance ?? ( _instance = new Config() ); }
+			get { return instance ?? ( instance = new Config() ); }
 		}
 
 		private Config() {
-			this._load();
+			this.Load();
 		}
 
 		internal float RefuelSpeed;
 
-		private void _load() {
+		private void Load() {
 			var node = ConfigNode.Load(ConfigFilePath);
-			var settings = node.GetNode(SettingsNodeName);
+			var settings = node.GetNode(settingsNodeName);
 			this.RefuelSpeed = float.Parse(settings.GetValue("RefuelSpeed"));
 		}
 	}
