@@ -30,7 +30,19 @@ namespace SimpleRefuel
         private readonly string icon_green = "SimpleRefuel/Textures/icon_green";
         private readonly string icon_red = "SimpleRefuel/Textures/icon_red";
 
-
+		/* RESOURCES COST */
+		Dictionary<string, float> resourcesCost = new Dictionary<string, float> { //From: https://wiki.kerbalspaceprogram.com/wiki/Resource
+			{ "ElectricCharge", 0.0f  }, 
+			{ "LiquidFuel",     0.8f  },
+			{ "Oxidizer",       0.18f },
+			{ "IntakeAir",      0.0f  },
+			{ "SolidFuel",      0.6f  },
+			{ "MonoPropellant", 1.2f  },
+			{ "XenonGas	",      4.0f  },
+			{ "Ore",            0.02f },
+			{ "Ablator",        0.5f  }
+		};
+		
 		/* MONOBEHAVIOUR METHODS */
 		void Awake()
         {
@@ -75,10 +87,18 @@ namespace SimpleRefuel
 
                     if (r.resourceName == resources[current_resource] && r.amount < r.maxAmount)
                     {
-                        if (r.maxAmount - r.amount > Config.Instance.RefuelSpeed * TimeWarp.deltaTime)
-                            r.amount += Config.Instance.RefuelSpeed * TimeWarp.deltaTime; // Charge 10 units per second
-                        else
-                            r.amount = r.maxAmount;
+                        if (r.maxAmount - r.amount > Config.Instance.RefuelSpeed * TimeWarp.deltaTime){				
+							if(Funding.CanAfford(Config.Instance.RefuelSpeed * resourcesCost[r.resourceName] * TimeWarp.deltaTime)){
+								r.amount += Config.Instance.RefuelSpeed * TimeWarp.deltaTime; // Charge RefuelSpeed units per second	
+								Funding.Instance.AddFunds(-Config.Instance.RefuelSpeed * resourcesCost[r.resourceName] * TimeWarp.deltaTime, TransactionReasons.Any);
+							}
+						}
+                        else {
+							if(Funding.CanAfford((float)(r.maxAmount - r.amount) * resourcesCost[r.resourceName])){
+								r.amount = r.maxAmount;	
+								Funding.Instance.AddFunds(-(r.maxAmount - r.amount) * resourcesCost[r.resourceName], TransactionReasons.Any);
+							}
+						}
                         
                         still_refuelling = true;
                     }
