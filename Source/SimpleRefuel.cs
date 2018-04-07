@@ -29,6 +29,7 @@ namespace SimpleRefuel
         private ApplicationLauncherButton button;
         private readonly string icon_green = "SimpleRefuel/Textures/icon_green";
         private readonly string icon_red = "SimpleRefuel/Textures/icon_red";
+
 		
 		/* MONOBEHAVIOUR METHODS */
 		void Awake()
